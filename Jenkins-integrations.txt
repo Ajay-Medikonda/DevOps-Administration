@@ -1,0 +1,9 @@
+Note: By default when we install jenkins on server, user 'jenkins' will be created.
+Log on to Jenkins >> su - jenkins 
+
+1.Git Hub Integration with jenkins
+ >>ssh-keygen
+ >>add private key in jenkins credientials
+ >>add public key in github ssh keys
+
+2.

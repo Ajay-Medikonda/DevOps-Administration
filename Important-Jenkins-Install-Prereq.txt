@@ -55,15 +55,71 @@ Jenkins Pre-Req:
   aws --version 
 
 10. Trivy Scanner
-   >>cd /usr/local/bin
-   #wget https://github.com/aquasecurity/trivy/releases/download/v0.42.0/trivy_0.42.0_Linux-64bit.deb
-   #sudo dpkg -i trivy_0.42.0_Linux-64bit.deb
-   wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.tar.gz
-   ll
-   tar xzvf trivy_0.41.0_Linux-64bit.tar.gz
-   trivy version
+  >>cd /usr/local/bin
+  #wget https://github.com/aquasecurity/trivy/releases/download/v0.42.0/trivy_0.42.0_Linux-64bit.deb
+  #sudo dpkg -i trivy_0.42.0_Linux-64bit.deb
+  wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.tar.gz
+  ll
+  tar xzvf trivy_0.41.0_Linux-64bit.tar.gz
+  trivy version
 
 11. apt update and reboot
+
+12. Jenkins
+ apt update
+  sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+ sudo apt-get update
+ sudo apt-get install jenkins = 2.387.3
+
+ sudo systemctl enable jenkins
+ sudo systemctl start jenkins
+ sudo systemctl status jenkins
+
+13.Jenkins SSL Configuration:
+https://www.baeldung.com/ops/jenkins-enable-https
+Using Certbot generate necessary public & private pem keys.
+
+#snap install --classic certbot
+
+#certbot certonly --manual --preferred-challenges=dns --key-type rsa --email ajay.medikonda@yahoo.com \
+--server https://acme-v02.api.letsencrypt.org/directory --agree-tos -d *.medikonda.xyz
+
+Copy both keys to Jenkins Server as:
+key.pem
+certificate.pem
+
+Convert in to p12 certificate:
+openssl pkcs12 -inkey <<key.pem>> -in <<certificate.pem>> -export -out certificate.p12
+
+Convert in to jks certificate:
+keytool -importkeystore -srckeystore ./certificate.p12 -srcstoretype pkcs12 -destkeystore jenkinsserver.jks -deststoretype JKS
+
+After installing Jenkins, perform following steps:
+sudo cp jenkinsserver.jks /var/lib/jenkins/
+sudo chown jenkins:jenkins /var/lib/jenkins/jenkinsserver.jks
+
+nano /lib/systemd/system/jenkins.service and add the following.
+#Environment="JENKINS_PORT=80"
+Environment="JENKINS_HTTPS_PORT=8443"
+Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkinsserver.jks"
+Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=India@123"
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+Save & exit file.
+systemctl daemon-reload && sudo systemctl status jenkins
+Note: We can check on which port service is running using following command
+#netstat -nltp
+
+echo 'JENKINS_ARGS=" $JENKINS_ARGS --httpsPort=8443  --httpPort=-1 --httpsPrivateKey=/etc/letsencrypt/live/awsb49.xyz/privkey.pem --httpsCertificate=/etc/letsencrypt/live/awsb49.xyz/fullchain.pem"' >> /etc/default/jenkins
+
+sudo systemctl restart jenkins && sudo systemctl status jenkins
+
+sudo systemctl daemon-reload && systemctl restart jenkins && sudo systemctl status jenkins
+service jenkins start
+service jenkins status --no-pager
 
 Plugins for Jenkins:
 1. AWS Steps Plugin
@@ -74,6 +130,45 @@ Plugins for Jenkins:
 6. Multibranch Scan Webhook Trigger
 7. Slack Notification
 8. Ansible
+
+12. Creating Jenkind Slaves using Ec2 Instance.
+Create credentials for slaves
+>>Manage Jenkins >> Credentials >> system >> Global Credentials (unrestricted)>>Add Credentials
+ > Kind: SSH username with private key
+ > ID: Give any name: UbuntuSlaveAccess
+ > Description: Give any name: UbuntuSlaveAccess
+ > user: ubuntu
+ > privatekey > Enter directly & add key fromprm file attached to slave instance
+ > create
+
+Create Nodes
+>>Manage Jenkins >> Manage nodes & clouds >> New Nodes
+ > Node Name: Dev-slave
+ > Select : Permanent Agent >> Create
+ > Description : Dev-slave
+ > Number of executors : 2 (As per requirement & also aviliable cpu's)
+ > Number of executors : /home/ubuntu
+ > Labels: Dev (Very Important, based on this label only this slave tiggers)
+ > Usage: Only build jobs with labels expressions matching this node.
+ > Launch method: Launch agent via SSH
+ > Host: Private IP DNS name of slave : ip-15-0-3-203.ec2.internal <<we use this because it wont change as public when ever restart of instance>>
+ > Credentials: Select UbuntuSlaveAccess Credentials created 
+ > Host Key Verification Strategy: No verifing Verification Strategy
+ > We can add Environment variables at agent level as below
+  >> Node Properties >> Environment variables 
+  > Name: ENV
+  > Value: Dev-Slaves
+ > Save
+
+We can create another node by simply copying from pevious created node & chaning the properties
+
+
+
+
+
+
+
+
 
 Following Jenkins Credentials also need to be created:
 ubuntu (slave-credentials)
