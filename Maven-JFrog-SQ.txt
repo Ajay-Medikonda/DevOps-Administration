@@ -1,0 +1,311 @@
+https://linuxize.com/post/how-to-install-apache-maven-on-ubuntu-20-04/
+https://www.vogella.com/tutorials/ApacheMaven/article.html
+https://javakeypoint.wordpress.com/2020/08/18/difference-between-mvn-clean-package-and-mvn-clean-install/
+
+Server should have 15GB EBS Volume.
+Maven & Pre-Req:
+1. jq, unzip, net-tools >> apt install -y jq net-tools unzip
+
+2. AWS CLI 2.0
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  sudo ./aws/install
+  aws --version 
+
+3. Java 11 >> apt install -y openjdk-11-jdk  >> java -version
+
+4. Maven >> apt install -y maven
+   Good videos on Maven: https://www.youtube.com/watch?v=Xatr8AZLOsE
+   For maven dependencies: https://search.maven.org/
+   https://springframework.guru/spring-profiles/
+   To Start a new Java Springboot Project:
+   https://start.spring.io/
+
+we can install maven using binary as follows
+Use below step:
+cd /opt
+wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz 
+tar xzvf apache-maven-3.8.4-bin.tar.gz 
+mv apache-maven-3.8.4-bin.tar.gz  maven
+echo 'export M2_HOME=/opt/maven' >> ~/.bashrc
+echo 'export PATH=${M2_HOME}/bin:${PATH}' >> ~/.bashrc
+source ~/.bashrc
+mvn  –version
+
+Working on Project
+git clone https://github.com/jenkins-docs/simple-java-maven-app.git
+mvn validate
+mvn compile
+mvn test
+mvn package
+java -jar /root/simple-java-maven-app/target/my-app-1.0-SNAPSHOT.jar
+nano /root/simple-java-maven-app/src/main/java/com/mycompany/app/App.java #Add Custom data
+nano /root/simple-java-maven-app/src/test/java/com/mycompany/app/AppTest.java #Add Custom data.
+
+maven command or lifecycle phases does below thing:
+mvn validate :- Validate the project is correct and all necessary information is available or not .
+mvn compile :- Compile your source code of the project.
+mvn Test(optional) :- Test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed.
+mvn Package :- Take the compiled code and package it as a jar or war as per pom file and move into  target folder.
+mvn verify :-  Run any checks on results of integration tests to ensure quality criteria are met.
+mvn install :- Install the package into the local repository, for use as a dependency in other projects locally.
+mvn deploy :-  Done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
+
+mvn clean
+mvn clean compile
+mvn clean compile test package
+mvn clean compile test package verify
+mvn clean compile test package verify install
+mvn clean compile test package verify install deploy
+mvn package -Dmaven.test.skip=true
+
+5.JForg >> Pre-reg > JAVA & Maven
+https://www.youtube.com/watch?v=1QwyWikh-Qk
+https://bitnami.com/stack/artifactory/cloud/aws
+Note: Default credentials can be found at /home/bitnami/bitnami_credentials
+
+JFrog installation
+ apt update
+ wget -qO - https://api.bintray.com/orgs/jfrog/keys/gpg/public.key | sudo apt-key add -
+ curl https://api.bintray.com/orgs/jfrog/keys/gpg/public.key
+ echo "deb https://jfrog.bintray.com/artifactory-debs bionic main" | tee /etc/apt/sources.list.d/jfrog.list
+ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B219DCCD7639232
+ apt-get update -y
+ sudo apt install jfrog-artifactory-oss -y
+ sudo systemctl start artifactory.service
+ sudo systemctl enable artifactory.service
+ Default Port : 8082 <In Bowser  publicip:8082/ui> we can open login into JFrog
+ Default_User : admin 
+ Default_Password: password 
+ Enter a url of your choice : https://jfrog.ajay.com > Next >Next > Select --> Maven >Next>Finish
+ i.Once JFROG is done, login and go to Application->Artifactory->Artifacts
+ ii.Select libs-release-local and click on “Set Me Up” , enter password and scroll down and click on generate settings.
+ iii. Copy the contexts to /root/.m2/settings.xml.
+ iv.ONce copied replace ID and Password for both <id>central</id> and <id>snapshots</id>.
+ v.Enable snapshots in the settings.xml file.
+
+How to increment artifact version
+ As of now everytime you run mvn clean deploy , it will create and push the package to jfrog with the same version 
+ which is 2.7.3. We can increment the version to avoid overwriting the artifacts.
+
+ https://medium.com/javarevisited/how-to-increment-versions-for-the-maven-build-java-project-a7596cc501c2
+
+ Add following code under the plugins:
+     <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.2.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.8.1</version>
+      </plugin>
+
+We can set the version by running the command:
+ mvn versions:set -DnewVersion=1.0.0
+ mvn install deploy
+
+ mvn versions:set -DnewVersion=1.0.1
+ mvn install deploy
+
+ mvn versions:set -DnewVersion=1.0.2
+ mvn install deploy
+
+Inorder to increment artifact version while using Jenkins
+ sh "mvn versions:set -DnewVersion=Dev-1.0.${BUILD_NUMBER}"
+ sh "mvn package deploy"
+
+ sh "mvn versions:set -DnewVersion=Prod-${BUILD_NUMBER}"
+ sh "mvn package deploy"
+
+6. SonarQube >> Pre-reg > JAVA & Maven && PostgreSQL
+a.Install and Configure PostgreSQL
+  sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+  wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
+  sudo apt install postgresql postgresql-contrib -y
+  sudo systemctl start postgresql
+  sudo passwd postgres
+  su - postgres
+  createuser sonar
+  psql
+  ALTER USER sonar WITH ENCRYPTED password 'my_strong_password';
+  CREATE DATABASE sonarqube OWNER sonar;
+  GRANT ALL PRIVILEGES ON DATABASE sonarqube to sonar;
+  \q
+  EXIT
+
+b.Download and Install SonarQube
+  sudo apt-get install zip -y
+  sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.7.1.62043.zip
+  sudo unzip sonarqube-9.7.1.62043.zip
+  sudo mv sonarqube-9.7.1.62043 /opt/sonarqube
+  rm -rf sonarqube-9.7.1.62043.zip
+
+Add SonarQube Group and User
+ sudo groupadd sonar
+ sudo useradd -d /opt/sonarqube -g sonar sonar 
+ sudo chown sonar:sonar /opt/sonarqube -R
+
+Configure SonarQube
+ sudo nano /opt/sonarqube/conf/sonar.properties
+ Uncomment the lines, and add the database user and password you created in Step 2.
+ sonar.jdbc.username=sonar
+ sonar.jdbc.password=my_strong_password
+
+ Add << sonar.jdbc.url=jdbc:postgresql://localhost:5432/sonarqube >> below above two lines
+ save & Exit file
+
+Setup Systemd service
+ sudo nano /etc/systemd/system/sonar.service
+ Save below text in the file and exit. 
+ [Unit]
+ Description=SonarQube service
+ After=syslog.target network.target
+
+ [Service]
+ Type=forking
+
+ ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+ ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+
+ User=sonar
+ Group=sonar
+ Restart=always
+
+ LimitNOFILE=65536
+ LimitNPROC=4096
+
+ [Install]
+ WantedBy=multi-user.target
+
+ sudo nano /etc/sysctl.conf
+
+ vm.max_map_count=262144
+ fs.file-max=65536
+ ulimit -n 65536
+ ulimit -u 4096
+
+ Save and exit the file. 
+
+Modify Kernel System Limits
+ sudo nano /etc/sysctl.conf
+
+ vm.max_map_count=262144
+ fs.file-max=65536
+ ulimit -n 65536
+ ulimit -u 4096
+ Save and exit the file. 
+
+Reboot the server.
+sudo systemctl enable sonar
+sudo systemctl start sonar
+sudo systemctl status sonar --no-pager
+
+Default poor: 9000
+We can login into using publicip:9000
+Default_User: admin
+Default_Password: admin
+
+Creating & setting Project
+ How do you want to create a project : Ex: Manually
+ >> Enter Project Display Name: & Next
+ >> Locally > next Generate Tocken 
+ After that run code generated for scanning
+
+7.SonarCloud >> We can also use sonarcloud instead of Sonarqube
+ Visirt https://sonarcloud.io and register with GitHub.
+ For public projects Sonarcloud is free.
+ Create project 
+  click on create a project Manually
+  Give name, orginasion & Display name of your choice
+  select Maven
+  generate token.
+export SONAR_TOKEN=a50bc7ea6f6dc6880a72dac64fd7a4af5ead0a25
+
+<properties>
+  <sonar.organization>devsecospb33</sonar.organization>
+  <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+</properties>
+
+mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=MyProjecyKeyTesting
+
+We can also perform scan from the local developer machine instead of running as a pipeline. This can be called as Shift Left Approach.
+
+Set the Sonat Token env variable locally.
+
+$Env:SONAR_TOKEN=’a50bc7ea6f6dc6880a72dac64fd7a4af5ead0a25’
+mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=devsecopsb34001
+
+
+FOR SCANNING SPRINGBOOT APP WITH MAVEN:
+---------------------------------------
+mvn clean verify sonar:sonar \
+  -Dsonar.projectKey=DevOpsB28 \
+  -Dsonar.host.url=http://ec2-35-153-213-51.compute-1.amazonaws.com:9000 \
+  -Dsonar.login=sqp_fd431ebda8818178698259cc0f3f688b266ec168
+  
+
+  
+FOR SCANNING TERRAFORM:
+--------------------------------------- 
+https://techexpert.tips/sonarqube/sonarqube-scanner-installation-ubuntu-linux/
+
+wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
+unzip sonar-scanner-cli-4.7.0.2747-linux.zip
+mv sonar-scanner-4.7.0.2747-linux/ /opt/sonar-scanner
+nano /opt/sonar-scanner/conf/sonar-scanner.properties
+sonar.host.url=http://localhost:9000
+sonar.sourceEncoding=UTF-8
+
+
+nano /etc/profile.d/sonar-scanner.sh
+#/bin/bash
+export PATH="$PATH:/opt/sonar-scanner/bin"
+
+reboot
+#source /etc/profile.d/sonar-scanner.sh
+env | grep PATH
+
+sonar-scanner -v
+
+sonar-scanner \
+  -Dsonar.projectKey=Terraform \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://ec2-35-153-213-51.compute-1.amazonaws.com:9000 \
+  -Dsonar.login=sqp_fefd12c5b6872932e12b32e13bf34dd7dad6791e
+
+
+
+Sonarqube Jenkins integration:
+https://www.linkedin.com/pulse/enforce-quality-gates-using-sonarqube-jenkins-tarun-prakash/
+
+https://snyk.io/learn/application-security/sast-vs-dast/
+
+APP Dynamic
+https://www.youtube.com/watch?v=y_ZPbSTf8uY
+https://www.youtube.com/watch?v=2wsqGtxhdiw
+
+NewRelic with Kubernetes:
+https://www.youtube.com/watch?v=B-1qIoBnla0
+
+Codecoverage
+https://stackoverflow.com/questions/195008/what-is-code-coverage-and-how-do-you-measure-it
+
+https://medium.com/codex/my-jenkins-story-writing-a-jenkins-shared-library-f255c036c4e7
+
+Sonarqube Config:
+https://medium.com/@nanditasahu031/jenkins-pipeline-with-maven-sonarqube-and-talisman-fa9118910b98
+
+https://medium.com/@sewwandikaus.13/sonarqube-code-analysis-of-a-spring-boot-project-de50a45c4b66
+
+https://medium.com/@gustavo.guss/jenkins-archive-artifact-save-file-in-pipeline-ac6d8b569c2c
+
+https://www.blazemeter.com/blog/jenkins-declarative-pipeline
+
+https://www.edureka.co/blog/email-notification-in-jenkins/
+
+https://www.edureka.co/blog/email-notification-in-jenkins/
+
+https://medium.com/@gustavo.guss/jenkins-sending-email-on-post-build-938b236545d2
+

@@ -1,0 +1,82 @@
+Master, Slaves should have 15GB EBS Volume.
+
+Genertae SSL Certs prior to Jenkins installation
+Make sure you already  have SonarQube running.
+Create a DNS Record for Jenkins as we need SSL Certs.
+
+Jenkins Pre-Req:
+1. Java 11 >> apt install -y openjdk-11-jdk  >> java -version
+2. Maven >> apt install -y maven
+3. jq, unzip, net-tools >> apt install -y jq net-tools unzip
+
+4. Terraform >> cd /usr/local/bin/ 
+  wget https://releases.hashicorp.com/terraform/1.6.1/terraform_1.6.1_linux_amd64.zip
+  unzip terraform_1.6.1_linux_amd64.zip
+  rm -rf terraform_1.6.1_linux_amd64.zip
+  terraform version  
+
+5. Packer >> cd /usr/local/bin/
+  wget https://releases.hashicorp.com/packer/1.9.4/packer_1.9.4_linux_amd64.zip
+  unzip packer_1.9.4_linux_amd64.zip
+  rm -rf packer_1.9.4_linux_amd64.zip
+  packer version
+
+6. Create ansibleadmin user
+  sudo useradd -m ansibleadmin --shell /bin/bash \
+  && sudo mkdir -p /home/ansibleadmin/.ssh \
+  && sudo chown -R ansibleadmin /home/ansibleadmin/ \
+  && sudo touch  /home/ansibleadmin/.ssh/authorized_keys \
+  && sudo usermod -aG sudo ansibleadmin \
+  && echo 'ansibleadmin ALL=(ALL) NOPASSWD: ALL' | sudo tee -a /etc/sudoers \
+  && cp /home/ubuntu/.ssh/authorized_keys /home/ansibleadmin/.ssh/authorized_keys
+
+7. Ansible  
+  sudo apt install software-properties-common
+  sudo add-apt-repository --yes --update ppa:ansible/ansible
+  sudo apt update && sudo apt install ansible -y
+  cd /etc/ansible
+  ll 
+  cat ansible.cfg
+  mv ansible.cfg ansible.cfg_default
+  ansible-config init --disabled > ansible.cfg
+  nano ansible.cfg
+    >>host_key_checking=False
+    >>remote_user=ansibleadmin
+    >>private_key_file=/home/ansibleadmin/ansibleadmin.pem
+
+8. Docker
+  curl https://get.docker.com/ | bash
+  usermod -a -G docker ubuntu & usermod -a -G docker ansibleadmin
+
+9. AWS CLI 2.0
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  sudo ./aws/install
+  aws --version 
+
+10. Trivy Scanner
+   >>cd /usr/local/bin
+   #wget https://github.com/aquasecurity/trivy/releases/download/v0.42.0/trivy_0.42.0_Linux-64bit.deb
+   #sudo dpkg -i trivy_0.42.0_Linux-64bit.deb
+   wget https://github.com/aquasecurity/trivy/releases/download/v0.41.0/trivy_0.41.0_Linux-64bit.tar.gz
+   ll
+   tar xzvf trivy_0.41.0_Linux-64bit.tar.gz
+   trivy version
+
+11. apt update and reboot
+
+Plugins for Jenkins:
+1. AWS Steps Plugin
+2. Docker Plugin
+3. SonarQube Scanner Version 2.15 and configure it in Jenins Configure System.
+4. Sonarqube qualitygate
+5. Blue Ocean
+6. Multibranch Scan Webhook Trigger
+7. Slack Notification
+8. Ansible
+
+Following Jenkins Credentials also need to be created:
+ubuntu (slave-credentials)
+jenkins (GitHubAccess)
+sonarqubeadmintoken
+Assign S3 Full Access Role to both Dev and Prod Jenkins Slaves
