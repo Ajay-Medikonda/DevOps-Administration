@@ -6,4 +6,26 @@ Log on to Jenkins >> su - jenkins
  >>add private key in jenkins credientials
  >>add public key in github ssh keys
 
-2.
+2.Sonarqube Integration with jenkins
+>>For Dev Environment
+>>Goto SonarQube : http://sonar.medikonda.xyz:9000 in browser & login 
+ >>Administration >Security >users >Administratoradmin >Tokens > Click (update Tokens) on 4 line symbol unde Tokens
+ >>Generate Tokens >Name <Any of your choice> : Jenkins-Tokens > Generate
+ >>Now goto Manage Jenkins >>> Credentials >> system >> Global Credentials (unrestricted)>>Add Credentials
+ >>Kind: Secret text
+ >>Secret:<<Generated in SonarQube>>: squ_5a082e8e60fce149e16c51d7185ec762a0553f1d
+ >>ID:<<Should be same as in jenkins file "projectKey"="spring-boot-app-dev"
+ >>Description: Give any name: spring-boot-app-dev
+ >>create
+
+
+
+
+>>Manage Jenkins
+ >>System Configuration >>Configure System >>SonarQube servers >>Add SonarQube
+ >>Name <<Should be same as in SonarQube at Jenkins file>> : Ajay-SonarQube-DEV 
+ >>Server URL <<url created for SonarQube>> : http://sonar.medikonda.xyz:9000
+ >>Server authentication token : select Secret text created
+
+
+ 
