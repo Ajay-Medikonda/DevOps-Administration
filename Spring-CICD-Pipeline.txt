@@ -1,0 +1,21 @@
+Setting up Spring CI-CD Multibranch Pipeline
+
+>>Jenkins Dashboord >New Item
+ >Enter an item name : Ajay-Spring-CI-CD-Pipeline
+ >Select: Multibranch Pipeline >Ok
+ >Branch Sources >add source >Git
+ >Project Repository : git@github.com:Ajay-Medikonda/Jenkins-Ajay-Spring-CI-CD-Pipeline-development.git
+
+ >Scan Multibranch Pipeline Triggers
+ >Scan by webhook: Trigger token : ajaydevops (say)
+
+Git webhook
+>>Go to github and open specified repo :  Ajay-Medikonda/Jenkins-Ajay-Spring-CI-CD-Pipeline-development
+>>Go to Setting on top of repo
+>>on lefthand side we will find Webhooks
+>>Add webhook 
+>>Payload URL
+ > <<jenkins url>>/multibranch-webhook-trigger/Trigger?token=<<Name given in Jenkins Trigger token>>
+ > https://jenkins.medikonda.xyz:8443/multibranch-webhook-trigger/Trigger?token=ajaydevops
+ > content type : application/json
+
