@@ -168,6 +168,9 @@ jenkins (GitHubAccess)
 sonarqubeadmintoken
 Assign S3 Full Access Role to both Dev and Prod Jenkins Slaves
 
+
+..........................................................................................................................
+
 Note: By default when we install jenkins on server, user 'jenkins' will be created.
 Log on to Jenkins >> su - jenkins 
 
@@ -248,17 +251,56 @@ Git webhook
  >Workspace : https://spreaderitsolutions.slack.com/services/B062K7CTLF3?added=1 is your slack url
                 In this : spreaderitsolutions is your Workspace
 >>Apply & Save
+..........................................................................................................................
 
+Multi branch Infra with multiple Account
 
+To do this we need to have different cloud accounts , Lets assume we have 2 aws accounts 
+1. Prasad - Account id - 370639060656  (Development Account) <-- Say
+2. Ajay - Account id - 912686981113 (say) 
 
+1. Prasad - Account id - 370639060656  (Development Account) <-- Say
+  >>Create a role
+  >>Select trusted entity >>Trusted entity type >>AWS account
+  >>An AWS account >>Another AWS account >>912686981113
+    >>Permissions policies >>AdministratorAccess >>Next
+  >>Role details 
+    >Role name : Jenkins-Assumed-Role
+    >Description : Jenkins-Assumed-Role
+    >Create Role
 
+2. Ajay - Account id - 912686981113 (say) 
+  >>Create a role
+  >>Select trusted entity >>Trusted entity type >>AWS account
+  >>An AWS account >>Another AWS account >>370639060656
+  >>Permissions policies >>AdministratorAccess >>Next
+  >>Role details 
+    >Role name : Jenkins-Assumed-Role
+    >Description : Jenkins-Assumed-Role
+    >Create Role
 
+3. We have to create a user in actual account where we run jenkins: 
+  Lets assume here we are using :Prasad - Account id - 370639060656
 
+Create policies to attach to user
+>>Set permissions >Permissions options >Attach policies directly >Create policy >json    
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+   "Action": "sts:AssumeRole",
+    "Resource": [
+        "arn:aws:iam::912686981113:role/Jenkins-Assumed-Role",
+        "arn:aws:iam::370639060656:role/Jenkins-Assumed-Roles"
+        ]
+  }
+}
+>>Next
+>>Review and create >Policy details >Policy name :Jenkins-Assumed-Policy >Description:Jenkins-Assumed-Policy
+>>Create Policy
+  
+>>IAM >Users >Create User 
+>>Specify user details >User details >User name :Jenkinsuser >Next
+>> Assign created "Jenkins-Assumed-Policy" to Jenkinsuser
+>>Generate Access key & Secreate key for this user
 
-
-
-
->> Log into Slack
- >Click on Browse Slack on lefthand side >Apps > Search for Jenkins CI
- >Jenkins CI >Add to Slack
- >
