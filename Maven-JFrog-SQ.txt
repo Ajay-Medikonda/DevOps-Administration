@@ -308,4 +308,3 @@ https://www.edureka.co/blog/email-notification-in-jenkins/
 https://www.edureka.co/blog/email-notification-in-jenkins/
 
 https://medium.com/@gustavo.guss/jenkins-sending-email-on-post-build-938b236545d2
-
