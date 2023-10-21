@@ -247,7 +247,7 @@ Git webhook
 >>Manage Jenkins >Configure System >Slack
  >Workspace : https://spreaderitsolutions.slack.com/services/B062K7CTLF3?added=1 is your slack url
                 In this : spreaderitsolutions is your Workspace
-
+>>Apply & Save
 
 
 
