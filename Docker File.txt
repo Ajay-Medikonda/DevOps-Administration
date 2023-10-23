@@ -1,0 +1,34 @@
+We have 2 types of builds
+ >Application Build
+ >Image Build
+>>Application Build: Developing, Compailing , Building an application File (i.e building a .jar or .war file)
+  >>For Building Java file (like spring boot application) we use Maven/Gradle/Ant
+  >>For Building Python file we use pip
+>>Image Build:Building that .jar or .war to image by using Docker
+
+Building Custom Images with Docker & Docker File
+>Docker filr reference : https://docs.docker.com/engine/reference/builder/
+Dockerfile: 
+  Docker can build images automatically by reading the instructions from a Dockerfile.
+  A Dockerfile is a text document that contains all the commands a user could call on the 
+  command line to assemble an image.
+
+Here is the format of the Dockerfile: INSTRUCTION arguments
+Most used instructions are as follows
+>FROM : The FROM instruction initializes a new build stage and sets the Base Image 
+ for subsequent instructions. As such, a valid Dockerfile must start with a FROM instruction. 
+ The image can be any valid image.
+ Ex: FROM nginx:latest
+ 
+>LABEL: The LABEL instruction adds metadata to an image. A LABEL is a key-value pair. 
+ LABEL <key>=<value> <key>=<value> <key>=<value> ...
+>RUN
+>COPY
+>ADD
+>ENV
+>ARG 
+>EXPOSE 
+>CMD 
+>ENTRYPOINT 
+>USER 
+>WORKDIR
