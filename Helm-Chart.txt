@@ -1,0 +1,19 @@
+After creating templeate folder & chart.yaml in side demo1-without-value-file
+## Come out of the folder & run following command to validate chart
+>> helm lint
+## After passing this we can deploy the application by using following command
+>> helm install <<name>> <<folder in which chart exits>>
+>> helm install nginxapp demo1-without-value-file
+>> helm ls ##To check weather the application deployed or not
+
+>>Now if we want update version from 0.1.0 to 1.1.0 in chart.yaml file then we will change
+  and save the file
+>>Now in order to updtae we have to run following command
+ >helm upgrade nginxapp demo1-without-value-file
+>>Now if we want to goback to older version we use following command
+ >helm rollback nginxapp
+>>Now to know history 
+ >helm history nginxapp
+>>Now if we want to uninstall the application
+ >helm uninstall nginxapp
+ 
