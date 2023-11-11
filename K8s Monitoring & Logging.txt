@@ -1,0 +1,39 @@
+>> What to monitor on kubernetes ?
+   >Cluster Health Status & Performance
+   >Capacity & Resource utilization(CPU & Memory) of Nodes & PODS (Containers)
+   >Ensure all pods are Running & Compleated Status related to cluster and application
+   >Other resources utilizations like Disk usage, Network i/o , Disk i/o, etc..,
+
+>> Troubleshooting containers and applications running on kubernetes cluster
+   >Node-level logging : Capture the logs of kubernetes components running on cluster 
+    >> In linux system Node logs are saved at "/var/log" directory
+   >Container-level logging : Pull Containers logs to ensure issues do not persist in 
+    next relese/fix (stdout, stderr, logs)
+   >Kubernetes events and audit logs
+
+>> Open-source Kubernetes Monitoring Tools
+   >Kubernetes Dashboard & Kubernetes Metrics Servers
+   >Prometheus
+   >Grafana
+   >EFK
+
+>> Prometheus 
+   >> Prometheus is a leading open-source monitoring solution to capture metrics and configure 
+      alerts for kubernetes.
+      >> Prometheus servers (Retrieval, TSDB ---> Disk(HDD/SDD), HTTP server)
+       >Retrieval
+       >TSDB
+       >HTTP Server
+      >> Pushgateway (to support short-lived jobs)
+      >> Exporters 
+      >> Alertmanager
+      >> Prometheus web UI (PromQL)
+      >> Service Discovery
+      >> Prometheus Targets
+
+>> Deploying Prometheus
+   >> We have to create namespace
+   >> We have to create RBAC
+   >> We have to create configmap
+
+ 

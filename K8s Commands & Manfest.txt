@@ -1,0 +1,97 @@
+>>Create a pod
+#kubectl run my-nginx-pod --image=nginx --restart=Never
+
+apiVersion: v1
+kind: Pod
+metadata:
+    lablels:
+        run: testpod1
+    name: testpod1
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+  
+kubectl create -f my-pod.yaml
+
+-----------------------------------
+
+>>Create a replicaset
+#kubectl create replicaset my-replicaset --image=nginx --replicas=3
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+
+-------------------------------------
+>>Create a Deployment
+#kubectl create deployment my-deployment --image=nginx --replicas=3
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+
+>>Create a Deamonset
+#
+
+>>Difference between deployment & deamonset
+
+Deployments and DaemonSets are both controller objects in Kubernetes, but they serve different purposes 
+and have distinct characteristics. Here are the key differences between Deployments and DaemonSets:
+
+1. **Use Case**:
+   - **Deployment**: Deployments are used to manage stateless applications, where each replica of the application is 
+   identical and can handle incoming requests interchangeably. They are commonly used for web services and microservices.
+
+   - **DaemonSet**: DaemonSets are used to run a single pod on every node in the cluster, ensuring that a particular 
+   application or service runs on every node. They are typically used for cluster-level services or agents that need to be present on every node, such as monitoring agents, log collectors, or network plugins.
+
+2. **Replica Behavior**:
+   - **Deployment**: Deployments manage the desired number of replicas but do not ensure that each replica runs on every node. Pods can be distributed across nodes as needed.
+   - **DaemonSet**: DaemonSets guarantee that one instance of the pod runs on every node, regardless of the number of nodes in the cluster.
+
+3. **Scaling**:
+   - **Deployment**: Deployments can scale the number of replicas up or down to handle changes in traffic or demand.
+   - **DaemonSet**: DaemonSets do not scale automatically. If you want to run the same application on additional nodes, you need to create another DaemonSet or manage the scaling manually.
+
+4. **Updating and Rolling Updates**:
+   - **Deployment**: Deployments support rolling updates and can manage changes to the application by creating new pods with the updated configuration and gradually replacing the old ones.
+   - **DaemonSet**: DaemonSets are not designed for rolling updates. If you need to update a DaemonSet, you typically need to create a new DaemonSet with the changes and then delete the old one.
+
+5. **Selectors and Labels**:
+   - **Deployment**: Deployments use selectors and labels to manage pods. They allow you to group pods with similar labels and match them with the selector in the Deployment.
+   - **DaemonSet**: DaemonSets also use labels, but the selector is typically based on the node's label, ensuring that a pod is scheduled on nodes with a specific label.
+
+6. **Use Cases**:
+   - **Deployment**: Deployments are best suited for applications where high availability and load balancing are essential, and updates need to be managed gracefully.
+   - **DaemonSet**: DaemonSets are suitable for running cluster-level services that need to be on every node, such as log collectors, monitoring agents, and network plugins.
+
+In summary, Deployments are used for stateless applications and provide features for scaling, updates, and rolling deployments. DaemonSets are used for running specific services on every node in the cluster and are well-suited for cluster-wide agents and system services. The choice between them depends on your specific use case and requirements.
